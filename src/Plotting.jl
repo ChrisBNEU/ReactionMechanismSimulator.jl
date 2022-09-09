@@ -492,7 +492,7 @@ end
 export plottimescales
 
 function plotrxntransitorysensitivities(bsol,name,t;dSdt=nothing,tau=nothing,tol=1e-3,N=0,rxntol=1e-6)
-    if !(name in getfield.(bsol.domain.phase.species,:name))
+    if !(name in getfield.(bsol.species,:name))
         error("Species $name not in domain")
     elseif !isnothing(dSdt) && (sum(dim > 1 for dim in size(dSdt)) > 1 || maximum(size(dSdt)) != length(bsol.p))
         error("dSdt must be a vector of length number of parameters")
@@ -536,7 +536,7 @@ function plotrxntransitorysensitivities(bsol,name,t;dSdt=nothing,tau=nothing,tol
     inds = inds[1:k]
     xs = Array{Float64,1}(1:length(inds))
     barh(xs,reverse(dSdt[inds]))
-    yticks(xs,reverse(getrxnstr.(bsol.domain.phase.reactions[inds])))
+    yticks(xs,reverse(getrxnstr.(bsol.reactions[inds])))
     xlabel("d/dt dLn([$name])/d(Ln(k_i))")
     xscale("symlog")
     return
