@@ -583,3 +583,57 @@ function plotthermotransitorysensitivities(bsol,name,t;dSdt=nothing,tau=nothing,
     return
 end
 export plotthermotransitorysensitivities
+
+"""
+helper function so we can extract transitory sensitivities. 
+"""
+function getrxntransitorysensitivities(bsol,name,t;dSdt=nothing,tau=nothing,tol=1e-3,N=0,rxntol=1e-6)
+    if !(name in getfield.(bsol.species,:name))
+        error("Species $name not in domain")
+    elseif !isnothing(dSdt) && (sum(dim > 1 for dim in size(dSdt)) > 1 || maximum(size(dSdt)) != length(bsol.p))
+        error("dSdt must be a vector of length number of parameters")
+    end
+
+    ind = findfirst(isequal(name),bsol.names)
+
+    rts = rates(bsol,t)
+    Rchar = norm(rts)
+    Rthresh = rxntol*Rchar
+
+    if dSdt === nothing
+        if tau === nothing
+            dSdt = transitorysensitivitiesfulltrapezoidal(bsol,t)[ind,length(bsol.names)+1:end]
+        else
+            dSdt = transitorysensitivitiesfulltrapezoidal(bsol,t,tau)[ind,length(bsol.names)+1:end]
+        end
+    else
+        dSdt = dSdt[length(bsol.names)+1:end]
+    end
+
+    inds = reverse(sortperm(abs.(dSdt)))
+    minval = 0.0
+    dSdtmax = maximum(abs.(dSdt))
+    maxthresh = dSdtmax*tol
+
+    inds = [i for i in inds if abs(rts[i]) > Rthresh] #weak filter based on reaction flux
+
+    if N == 0
+        N = length(inds)
+    elseif N > length(inds)
+        N = length(inds)
+    end
+    inds = inds[1:N]
+    mval = abs(dSdt[inds[1]])
+    minval = mval*tol
+    k = 1
+    while k < length(inds) && abs(dSdt[inds[k]]) >= minval
+        k += 1
+    end
+    inds = inds[1:k]
+    xs = Array{Float64,1}(1:length(inds))
+    sens = dSdt[inds]
+    sens_reactions = bsol.reactions[inds]
+#    sens_reactions = reverse(getrxnstr.(bsol.reactions[inds]))
+
+    return sens_reactions, sens
+end
