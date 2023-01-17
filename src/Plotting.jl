@@ -637,3 +637,4 @@ function getrxntransitorysensitivities(bsol,name,t;dSdt=nothing,tau=nothing,tol=
 
     return sens_reactions, sens
 end
+export getrxntransitorysensitivities
