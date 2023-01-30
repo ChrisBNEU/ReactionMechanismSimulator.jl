@@ -89,5 +89,19 @@ function choosepairs(rxn::T) where {T<:AbstractReaction}
     return pairs
 end
 
+function getrxnsmiles(rxn::T) where {T<:AbstractReaction}
+    reac_smiles = [reac.smiles for reac in rxn.reactants]
+    prod_smiles = [prod.smiles for prod in rxn.products]
+    return reac_smiles, prod_smiles
+end
+export getrxnsmiles
+
+function getrxnadjlist(rxn::T) where {T<:AbstractReaction}
+    reac_adjlist = [reac.adjlist for reac in rxn.reactants]
+    prod_adjlist = [prod.adjlist for prod in rxn.products]
+    return reac_adjlist, prod_adjlist
+end
+export getrxnadjlist
+
 length(r::T) where {T<:AbstractReaction}= 1
 export length
