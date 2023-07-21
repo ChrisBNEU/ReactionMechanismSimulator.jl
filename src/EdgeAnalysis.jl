@@ -9,6 +9,7 @@ using SciMLBase: build_solution
 using Base.Iterators: flatten
 using Printf
 using CUDA
+# using NVTX
 using Test
 
 abstract type AbstractTerminationCriterion end
@@ -422,7 +423,7 @@ Process flux information into useful quantities for edge analysis
 function processfluxes(sim::Simulation,corespcsinds,corerxninds,edgespcsinds,edgerxninds)
 
     dydt,rts,frts,rrts,radrts,cs = calcfluxes(sim)
-
+    d = sim.domain
     @inbounds corespeciesrates = abs.(dydt[corespcsinds])
     charrate = sqrt(dot(corespeciesrates,corespeciesrates))
 
@@ -487,7 +488,7 @@ function processfluxes(sim::Simulation,corespcsinds,corerxninds,edgespcsinds,edg
 
     #process core species consumption and production rates using CPU
     function core_spc_conc_prod_rates_cpu(corespeciesconcentrations, d, frts, rrts)
-
+    print("running cpu example")
         l = length(corespeciesconcentrations)
         
         corespeciesconsumptionrates = zeros(l)
@@ -532,6 +533,7 @@ function processfluxes(sim::Simulation,corespcsinds,corerxninds,edgespcsinds,edg
 
     #process core species consumption and production rates using CPU
     function core_spc_conc_prod_rates_gpu(corespeciesconcentrations, d, frts, rrts)
+        print("running gpu example")
         l = length(corespeciesconcentrations)
         # Initialize CUArrays
         corespeciesconsumptionrates = CUDA.zeros(l)
