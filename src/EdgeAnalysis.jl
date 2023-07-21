@@ -488,7 +488,7 @@ function processfluxes(sim::Simulation,corespcsinds,corerxninds,edgespcsinds,edg
 
     #process core species consumption and production rates using CPU
     function core_spc_conc_prod_rates_cpu(corespeciesconcentrations, d, frts, rrts)
-    print("running cpu example")
+        print("running cpu example")
         l = length(corespeciesconcentrations)
         
         corespeciesconsumptionrates = zeros(l)
@@ -540,6 +540,8 @@ function processfluxes(sim::Simulation,corespcsinds,corerxninds,edgespcsinds,edg
         corespeciesproductionrates = CUDA.zeros(l)
         corespeciesnetconsumptionrates = CUDA.zeros(l)
         coreradicalnetterminationrates = CUDA.zeros(l)
+        
+        #these don't get used? 
         frts_d = cu(frts)
         rrts_d = cu(rrts)
         
@@ -548,7 +550,14 @@ function processfluxes(sim::Simulation,corespcsinds,corerxninds,edgespcsinds,edg
         r1 = @view rxnarray[1:4,:]
         r2 = @view rxnarray[5:8,:]
         m = size(rxnarray)[2]
-        radicale = cu(d.phase.species[rxnarray].radicalelectrons)
+        # this is probably really slow. but it should be in another routine and run once
+        rxnarray_cpu = zeros(size(d.rxnarray))
+        @inbounds for i = 1:size(d.rxnarray)[2]
+            for j = 1:8
+                rxnarray_cpu[i,j] = d.phase.species[rxnarray[i,j]].radicalelectrons
+            end
+        end
+        radicale = cu(rxnarray_cpu)  
         radicalc = cu(abs(min(d.phase.reactions.radicalchange, 0.0)))
 
         # Create masks to eliminate IF branching
