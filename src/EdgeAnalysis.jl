@@ -554,7 +554,7 @@ function processfluxes(sim::Simulation,corespcsinds,corerxninds,edgespcsinds,edg
         rxnarray_cpu = zeros(size(d.rxnarray))
         @inbounds for i = 1:size(d.rxnarray)[2]
             for j = 1:8
-                rxnarray_cpu[i,j] = d.phase.species[rxnarray[i,j]].radicalelectrons
+                rxnarray_cpu[i,j] = d.phase.species[d.rxnarray[i,j]].radicalelectrons
             end
         end
         radicale = cu(rxnarray_cpu)  
