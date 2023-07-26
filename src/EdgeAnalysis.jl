@@ -508,6 +508,7 @@ function processfluxes(sim::Simulation,corespcsinds,corerxninds,edgespcsinds,edg
                     corespeciesnetconsumptionrates[d.rxnarray[j,i]] += net_forward_rate
                     if d.phase.species[d.rxnarray[j,i]].radicalelectrons == 1
                         coreradicalnetterminationrates[d.rxnarray[j,i]] += net_forward_rate * abs(min(d.phase.reactions[i].radicalchange, 0.0))
+                        d
                     end
                 else
                     break
@@ -527,6 +528,14 @@ function processfluxes(sim::Simulation,corespcsinds,corerxninds,edgespcsinds,edg
                 end
             end
         end
+        eleclist = [spec.radicalelectrons for spec in d.phase.species]
+        radchange = [rxn.radicalchange for rxn in d.phase.reactions]
+        print(d.rxnarray)
+        print(eleclist)
+        print(corespeciesconsumptionrates)
+        print(frts)
+        print(rrts)
+        print(radchange)
 
         return corespeciesconsumptionrates, corespeciesproductionrates, corespeciesnetconsumptionrates, coreradicalnetterminationrates
     end
